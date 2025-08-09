@@ -6,6 +6,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -40,80 +42,88 @@ export default function UserDetails() {
     };
 
     console.log('User Details:', userDetails);
-    setErrorMessage(''); // clear any previous error
+    setErrorMessage('');
 
-    // TODO: Save userDetails to local storage / backend
-
-    router.replace('/screens/Dashboard'); // Navigate to Dashboard
+    router.replace('/screens/Dashboard');
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.formBox}>
-        <Text style={styles.heading}>Enter User Details</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 20}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.formBox}>
+          <Text style={styles.heading}>Enter User Details</Text>
 
-        <Text style={styles.label}>Number of Family Members</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={familyMembers}
-          onChangeText={setFamilyMembers}
-        />
+          <Text style={styles.label}>Number of Family Members</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={familyMembers}
+            onChangeText={setFamilyMembers}
+          />
 
-        <Text style={styles.label}>Age</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={age}
-          onChangeText={setAge}
-        />
+          <Text style={styles.label}>Age</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={age}
+            onChangeText={setAge}
+          />
 
-        <Text style={styles.label}>Income Source</Text>
-        <View style={styles.radioGroup}>
-          {['single', 'dual', 'multi'].map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={styles.radioButton}
-              onPress={() => setIncomeSource(type)}
-            >
-              <View
-                style={[
-                  styles.radioCircle,
-                  incomeSource === type && styles.radioSelected,
-                ]}
-              />
-              <Text style={styles.radioLabel}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <Text style={styles.label}>Income Source</Text>
+          <View style={styles.radioGroup}>
+            {['single', 'dual', 'multi'].map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={styles.radioButton}
+                onPress={() => setIncomeSource(type)}
+              >
+                <View
+                  style={[
+                    styles.radioCircle,
+                    incomeSource === type && styles.radioSelected,
+                  ]}
+                />
+                <Text style={styles.radioLabel}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.label}>Total Family Income</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={totalIncome}
+            onChangeText={setTotalIncome}
+          />
+
+          <Text style={styles.label}>Fixed Family Expenses</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={fixedExpenses}
+            onChangeText={setFixedExpenses}
+          />
+
+          {errorMessage !== '' && (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          )}
+
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitText}>Submit</Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.label}>Total Family Income</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={totalIncome}
-          onChangeText={setTotalIncome}
-        />
-
-        <Text style={styles.label}>Fixed Family Expenses</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={fixedExpenses}
-          onChangeText={setFixedExpenses}
-        />
-
-        {errorMessage !== '' && (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        )}
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitText}>Submit</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   Ionicons,
@@ -53,8 +54,8 @@ export default function AddGoal() {
 
   const handleDone = () => {
     if (!name.trim() || !amount.trim()) {
-      alert('Goal name and amount are required!');
-      return;
+     Alert.alert('Validation Error', 'Goal name and amount are required!');
+    return;
     }
 
     const newGoal = {

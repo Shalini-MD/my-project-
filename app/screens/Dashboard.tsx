@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Platform,
   Animated,
   Easing,
+  Dimensions,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
@@ -20,10 +21,14 @@ import { useRouter } from 'expo-router';
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const router = useRouter();
-  const pulseAnim = useState(new Animated.Value(1))[0];
+  const [isDrawerVisible, setDrawerVisible] = useState(false);
 
-  React.useEffect(() => {
+  const pulseAnim = useState(new Animated.Value(1))[0];
+  const drawerAnim = useState(new Animated.Value(-300))[0];
+
+  const router = useRouter();
+
+  useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
@@ -60,10 +65,31 @@ export default function Dashboard() {
 
   const { day, month, year } = formatDate(selectedDate);
 
+  const openDrawer = () => {
+    setDrawerVisible(true);
+    Animated.timing(drawerAnim, {
+      toValue: 0,
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const closeDrawer = () => {
+    Animated.timing(drawerAnim, {
+      toValue: -300,
+      duration: 300,
+      easing: Easing.in(Easing.ease),
+      useNativeDriver: false,
+    }).start(() => setDrawerVisible(false));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Feather name="menu" size={24} />
+        <TouchableOpacity onPress={openDrawer}>
+          <Feather name="menu" size={24} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Fin Track</Text>
         <TouchableOpacity onPress={() => setShowPicker(true)}>
           <Feather name="calendar" size={22} />
@@ -89,18 +115,6 @@ export default function Dashboard() {
           onChange={handleChange}
         />
       )}
-      {showPicker && Platform.OS === 'web' && (
-        <View style={styles.webCalendar}>
-          <input
-            type="date"
-            onChange={(e) => {
-              const date = new Date(e.target.value);
-              setSelectedDate(date);
-              setShowPicker(false);
-            }}
-          />
-        </View>
-      )}
 
       <View style={styles.noRecordsContainer}>
         <View style={styles.noRecords}>
@@ -112,47 +126,123 @@ export default function Dashboard() {
           <Text style={styles.noRecordText}>No records</Text>
         </View>
       </View>
+<View style={styles.bottomNav}>
+  <TouchableOpacity style={styles.navItem}>
+    <MaterialCommunityIcons
+      name="file-document-outline"
+      size={24}
+      color="#f9c400"
+    />
+    <Text style={styles.navLabelActive}>Records</Text>
+  </TouchableOpacity>
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons
-            name="file-document-outline"
-            size={24}
-            color="#f9c400"
-          />
-          <Text style={styles.navLabelActive}>Records</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.navItem}
+    onPress={() => router.push('/screens/charts')}
+  >
+    <Ionicons name="pie-chart-outline" size={24} color="gray" />
+    <Text style={styles.navLabel}>Charts</Text>
+  </TouchableOpacity>
 
+  {/* Placeholder for space under the "+" button */}
+  <View style={{ width: 56 }} />
+  <Animated.View
+  style={[
+    styles.addButtonContainer,
+    { transform: [{ scale: pulseAnim }] },
+  ]}
+>
+  <TouchableOpacity
+    onPress={() => router.push('/screens/AddEntry')}
+    style={styles.addButton}
+  >
+    <FontAwesome name="plus" size={24} color="white" />
+  </TouchableOpacity>
+</Animated.View>
+
+
+  <TouchableOpacity
+    style={styles.navItem}
+    onPress={() => router.push('/screens/Reports')}
+  >
+    <Feather name="file-text" size={24} color="gray" />
+    <Text style={styles.navLabel}>Reports</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.navItem}
+    onPress={() => router.push('/screens/goals')}
+  >
+    <Ionicons name="flag" size={24} color="gray" />
+    <Text style={styles.navLabel}>Goals</Text>
+  </TouchableOpacity>
+</View>
+
+
+      {/* Drawer Modal */}
+      {isDrawerVisible && (
         <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/screens/charts')}
+          style={styles.drawerOverlay}
+          activeOpacity={1}
+          onPress={closeDrawer}
         >
-          <Ionicons name="pie-chart-outline" size={24} color="gray" />
-          <Text style={styles.navLabel}>Charts</Text>
-        </TouchableOpacity>
+          <Animated.View style={[styles.drawerContainer, { left: drawerAnim }]}>
+            <View style={styles.drawerHeader}>
+              <View style={styles.logoCircle}>
+                <Text style={{ fontSize: 20, color: 'black' }}>FT</Text>
+              </View>
+              <Text style={styles.drawerHi}>Hi, Username</Text>
+            </View>
 
-        <Animated.View style={[styles.addButtonContainer, { transform: [{ scale: pulseAnim }] }]}>
-          <TouchableOpacity
-            onPress={() => router.push('/screens/AddEntry')}
-            style={styles.addButton}
-          >
-            <FontAwesome name="plus" size={24} color="white" />
-          </TouchableOpacity>
-        </Animated.View>
+           <View style={styles.drawerContent}>
+  <TouchableOpacity
+    style={styles.drawerItem}
+    onPress={() => {
+      closeDrawer();
+      router.push('/screens/security'); // <-- Add this screen
+    }}
+  >
+    <Feather name="shield" size={20} color="#333" />
+    <Text style={styles.drawerText}>Security</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
-          <Feather name="file-text" size={24} color="gray" />
-          <Text style={styles.navLabel}>Reports</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.drawerItem}
+    onPress={() => {
+      closeDrawer();
+      router.push('/screens/backup'); // <-- Add this screen
+    }}
+  >
+    <Feather name="cloud" size={20} color="#333" />
+    <Text style={styles.drawerText}>Backup</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/screens/goals')}
-        >
-          <Ionicons name="flag" size={24} color="gray" />
-          <Text style={styles.navLabel}>Goals</Text>
+  <TouchableOpacity
+    style={styles.drawerItem}
+    onPress={() => {
+      closeDrawer();
+      router.push('/screens/suggestion');
+    }}
+  >
+    <Feather name="message-square" size={20} color="#333" />
+    <Text style={styles.drawerText}>Feedback</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.drawerItem}
+    onPress={() => {
+      closeDrawer();
+      router.push('/screens/ratings'); // <-- Add this screen
+    }}
+  >
+    <Feather name="star" size={20} color="#333" />
+    <Text style={styles.drawerText}>Ratings</Text>
+  </TouchableOpacity>
+</View>
+
+          </Animated.View>
         </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 }
@@ -194,9 +284,9 @@ const styles = StyleSheet.create({
   noRecordsContainer: {
     flex: 1,
     backgroundColor: 'white',
-    marginHorizontal: 20,
+    
     marginVertical: 20,
-    borderRadius: 12,
+    borderRadius: 1,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
@@ -223,7 +313,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ccc',
     paddingVertical: 10,
-    paddingBottom: 20,
+    paddingBottom: 50,
     position: 'relative',
   },
   navItem: {
@@ -240,7 +330,7 @@ const styles = StyleSheet.create({
   },
   addButtonContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 50,
     left: '50%',
     marginLeft: -28,
     zIndex: 10,
@@ -254,12 +344,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
-  webCalendar: {
-    margin: 20,
+  drawerOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 20,
+  },
+  drawerContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 280,
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 10,
+    zIndex: 30,
+  },
+  drawerHeader: {
+    backgroundColor: '#d0e8ff',
+    flexDirection: 'row',
     alignItems: 'center',
+    padding: 16,
+  },
+  logoCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'white',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+    elevation: 2,
+  },
+  drawerHi: {
+    fontSize: 16,
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  drawerContent: {
+    padding: 16,
+  },
+  drawerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  drawerText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 10,
   },
 });

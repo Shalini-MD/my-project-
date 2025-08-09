@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   policyWrapper: {
     width: '100%',
     position: 'absolute',
-    bottom: 0,
+    bottom: 50,
     backgroundColor: '#eee',
     paddingVertical: 16,
     paddingBottom: Platform.OS === 'android' ? 25 : 20,

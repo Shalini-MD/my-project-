@@ -1,3 +1,4 @@
+// AddEntry.tsx
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Modal, Platform
@@ -6,6 +7,7 @@ import {
   Feather, FontAwesome, Ionicons, MaterialIcons, MaterialCommunityIcons, Entypo, FontAwesome5
 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddEntry() {
@@ -34,11 +36,15 @@ export default function AddEntry() {
       setAmount((prev) => prev.slice(0, -1));
     } else if (val === 'ok') {
       if (!amount) {
-        alert('Please enter amount');
-        return;
-      }
-      alert(`Saved ${selectedCategory}: ₹${amount} on ${date.toLocaleDateString()} ${note ? `(Note: ${note})` : ''}`);
-      setModalVisible(false);
+  Alert.alert('Error', 'Please enter amount');
+  return;
+}
+Alert.alert(
+  'Success',
+  `Saved ${selectedCategory}: ₹${amount} on ${date.toLocaleDateString()}${note ? ` (Note: ${note})` : ''}`
+);
+setModalVisible(false);
+
     } else if (val === '+') {
       setAmount((prev) => (prev ? (parseFloat(prev) + 1).toFixed(2) : '1'));
     } else if (val === '-') {
@@ -52,15 +58,15 @@ export default function AddEntry() {
       setAmount((prev) => prev + val);
     }
   };
-const renderKey = (label: string, icon?: React.ReactNode) => (
 
+  const renderKey = (label: string, icon?: React.ReactNode) => (
     <TouchableOpacity key={label} style={styles.key} onPress={() => handleKeyPress(label)}>
       {icon || <Text style={styles.keyText}>{label}</Text>}
     </TouchableOpacity>
   );
 
   const expenseCategories = [
-     { name: 'Shopping', icon: () => <FontAwesome name="shopping-bag" size={24} color="#333" /> },
+    { name: 'Shopping', icon: () => <FontAwesome name="shopping-bag" size={24} color="#333" /> },
     { name: 'Food', icon: () => <Ionicons name="fast-food-outline" size={24} color="#333" /> },
     { name: 'Phone', icon: () => <Feather name="phone" size={24} color="#333" /> },
     { name: 'Entertainment', icon: () => <MaterialIcons name="movie" size={24} color="#333" /> },
@@ -83,7 +89,7 @@ const renderKey = (label: string, icon?: React.ReactNode) => (
   ];
 
   const incomeCategories = [
-    { name: 'Salary', icon: () => <FontAwesome name="money" size={24} color="#333" /> }, 
+    { name: 'Salary', icon: () => <FontAwesome name="money" size={24} color="#333" /> },
     { name: 'Rent', icon: () => <MaterialIcons name="house-siding" size={24} color="#333" /> },
     { name: 'Part Time', icon: () => <Ionicons name="briefcase-outline" size={24} color="#333" /> },
     { name: 'Lottery', icon: () => <MaterialCommunityIcons name="ticket-confirmation-outline" size={24} color="#333" /> },
@@ -92,10 +98,10 @@ const renderKey = (label: string, icon?: React.ReactNode) => (
   ];
 
   const currentCategories = selectedType === 'expense' ? expenseCategories : incomeCategories;
-  const isOthersCategory = selectedCategory === 'Others';
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="black" />
@@ -104,6 +110,7 @@ const renderKey = (label: string, icon?: React.ReactNode) => (
         <View style={{ width: 24 }} />
       </View>
 
+      {/* Switch Type */}
       <View style={styles.switchContainer}>
         {['expense', 'income'].map((type) => (
           <TouchableOpacity
@@ -118,7 +125,8 @@ const renderKey = (label: string, icon?: React.ReactNode) => (
         ))}
       </View>
 
-      <ScrollView style={styles.whiteBox}>
+      {/* Category Grid */}
+      <ScrollView style={styles.whiteBox} contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={styles.grid}>
           {currentCategories.map((item, index) => (
             <TouchableOpacity key={index} style={styles.gridItem} onPress={() => openModal(item.name)}>
@@ -129,6 +137,7 @@ const renderKey = (label: string, icon?: React.ReactNode) => (
         </View>
       </ScrollView>
 
+      {/* Modal */}
       <Modal animationType="slide" transparent visible={modalVisible}>
         <TouchableOpacity activeOpacity={1} onPressOut={() => setModalVisible(false)} style={styles.modalOverlay}>
           <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
@@ -217,7 +226,7 @@ const styles = StyleSheet.create({
   inactiveText: { color: 'black', fontWeight: '600' },
   whiteBox: { backgroundColor: 'white', flex: 1, paddingHorizontal: 10, paddingTop: 15 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  gridItem: { width: '30%', alignItems: 'center', marginVertical: 12 },
+  gridItem: { width: '33.33%', alignItems: 'center', marginVertical: 15 },
   iconCircle: { backgroundColor: '#eee', padding: 15, borderRadius: 50, marginBottom: 5 },
   iconLabel: { textAlign: 'center', fontSize: 12, color: '#333' },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },

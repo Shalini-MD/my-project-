@@ -62,7 +62,7 @@ const Goals = () => {
 
   const handleGoalPress = (goal: any) => {
     router.replace({
-      pathname: '/screens/Progresscircle',
+      pathname: '/screens/goalsDetails',
       params: {
         goal: JSON.stringify(goal),
       },
